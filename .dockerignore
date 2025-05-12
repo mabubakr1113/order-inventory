@@ -1,0 +1,83 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Build files
+dist/
+build/
+coverage/
+out/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Log files
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Testing
+test/
+tests/
+__tests__/
+__mocks__/
+cypress/
+*.spec.ts
+*.test.ts
+jest.config.*
+.vitest/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+.gitmodules
+
+# Docker files
+docker-compose*.yml
+docker-compose*
+.dockerignore
+Dockerfile*
+dockerfile*
+
+# Documentation
+*.md
+CHANGELOG
+LICENSE
+docs/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Cache directories
+.npm/
+.yarn/
+.cache/
+.tmp/
+temp/
+
+# TypeScript
+*.ts
+!tsconfig.json
+
+# Config files (except needed ones)
+!package.json
+!package-lock.json
+!tsconfig*.json
+*.yml
+*.yaml
