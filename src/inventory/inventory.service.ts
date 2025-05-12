@@ -14,7 +14,11 @@ export class InventoryService implements OnModuleInit {
   ) {}
 
   async findAll(): Promise<Product[]> {
-    return await this.productRepository.find();
+    try {
+      return await this.productRepository.find();
+    } catch {
+      throw new Error('Could not retrieve products.');
+    }
   }
 
   async onModuleInit() {
@@ -41,21 +45,25 @@ export class InventoryService implements OnModuleInit {
   }
 
   async handleOrderCreated(order: InventoryOrderCreatedDto): Promise<void> {
-    const product = await this.productRepository.findOneBy({
-      productId: order.productId,
-    });
+    try {
+      const product = await this.productRepository.findOneBy({
+        productId: order.productId,
+      });
 
-    const result = {
-      orderId: order.orderId,
-      status: 'cancelled',
-    };
+      const result = {
+        orderId: order.orderId,
+        status: 'cancelled',
+      };
 
-    if (product && product.stock >= order.quantity) {
-      product.stock -= order.quantity;
-      await this.productRepository.save(product);
-      result.status = 'confirmed';
+      if (product && product.stock >= order.quantity) {
+        product.stock -= order.quantity;
+        await this.productRepository.save(product);
+        result.status = 'confirmed';
+      }
+
+      this.eventEmitter.emit('order_processed', result);
+    } catch {
+      throw new Error('Could not process order.');
     }
-
-    this.eventEmitter.emit('order_processed', result);
   }
 }

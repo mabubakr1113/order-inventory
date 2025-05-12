@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,19 +18,39 @@ export class OrderService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
-    const order = this.orderRepository.create(createOrderDto);
-    await this.orderRepository.save(order);
-    this.eventEmitter.emit('order_created', { ...order, orderId: order.id });
-    return order;
+    try {
+      const order = this.orderRepository.create(createOrderDto);
+      await this.orderRepository.save(order);
+      this.eventEmitter.emit('order_created', { ...order, orderId: order.id });
+      return order;
+    } catch {
+      throw new InternalServerErrorException('Could not create order.');
+    }
   }
 
   async handleOrderProcessed(payload: { orderId: string; status: string }) {
-    await this.orderRepository.update(payload.orderId, {
-      status: payload.status,
-    });
+    const order = await this.orderRepository.findOneBy({ id: payload.orderId });
+    if (!order) {
+      throw new NotFoundException(
+        `Order with ID "${payload.orderId}" not found`,
+      );
+    }
+    try {
+      await this.orderRepository.update(payload.orderId, {
+        status: payload.status,
+      });
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      throw new InternalServerErrorException('Could not update order status.');
+    }
   }
 
   async findAll(): Promise<Order[]> {
-    return this.orderRepository.find();
+    try {
+      throw new Error('Simulated error for testing');
+      return this.orderRepository.find();
+    } catch {
+      throw new InternalServerErrorException('Could not retrieve orders.');
+    }
   }
 }
