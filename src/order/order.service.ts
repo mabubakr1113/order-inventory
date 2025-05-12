@@ -16,8 +16,14 @@ export class OrderService {
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
     const order = this.orderRepository.create(createOrderDto);
     await this.orderRepository.save(order);
-    this.eventEmitter.emit('order_created', order);
+    this.eventEmitter.emit('order_created', { ...order, orderId: order.id });
     return order;
+  }
+
+  async handleOrderProcessed(payload: { orderId: string; status: string }) {
+    await this.orderRepository.update(payload.orderId, {
+      status: payload.status,
+    });
   }
 
   async findAll(): Promise<Order[]> {

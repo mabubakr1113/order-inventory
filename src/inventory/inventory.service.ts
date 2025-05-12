@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Product } from './entities/product.entity';
 import { InventoryOrderCreatedDto } from './dto/inventory-order-created.dto';
 
@@ -9,6 +10,7 @@ export class InventoryService implements OnModuleInit {
   constructor(
     @InjectRepository(Product, 'inventoryConnection')
     private productRepository: Repository<Product>,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async findAll(): Promise<Product[]> {
@@ -38,14 +40,22 @@ export class InventoryService implements OnModuleInit {
     }
   }
 
-  async adjustStockForOrder(order: InventoryOrderCreatedDto): Promise<void> {
+  async handleOrderCreated(order: InventoryOrderCreatedDto): Promise<void> {
     const product = await this.productRepository.findOneBy({
       productId: order.productId,
     });
 
+    const result = {
+      orderId: order.orderId,
+      status: 'cancelled',
+    };
+
     if (product && product.stock >= order.quantity) {
       product.stock -= order.quantity;
       await this.productRepository.save(product);
+      result.status = 'confirmed';
     }
+
+    this.eventEmitter.emit('order_processed', result);
   }
 }

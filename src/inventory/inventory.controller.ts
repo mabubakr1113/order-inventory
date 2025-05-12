@@ -15,6 +15,6 @@ export class InventoryController {
 
   @OnEvent('order_created')
   async handleOrderCreatedEvent(order: InventoryOrderCreatedDto) {
-    await this.inventoryService.adjustStockForOrder(order);
+    await this.inventoryService.handleOrderCreated(order);
   }
 }
