@@ -47,7 +47,6 @@ export class OrderService {
 
   async findAll(): Promise<Order[]> {
     try {
-      throw new Error('Simulated error for testing');
       return this.orderRepository.find();
     } catch {
       throw new InternalServerErrorException('Could not retrieve orders.');
