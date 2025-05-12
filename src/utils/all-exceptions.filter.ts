@@ -3,8 +3,22 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+
+interface ErrorResponse {
+  statusCode: number;
+  message: string | string[];
+  timestamp: string;
+  path: string;
+}
+
+interface ExceptionResponse {
+  statusCode?: number;
+  message?: string | string[];
+  error?: string;
+}
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -14,11 +28,22 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
 
-    response.status(status).json({
+    const exceptionResponse = exception.getResponse();
+    const safeResponse: ExceptionResponse =
+      typeof exceptionResponse === 'object' && exceptionResponse !== null
+        ? (exceptionResponse as ExceptionResponse)
+        : { message: exception.message };
+
+    const responseBody: ErrorResponse = {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message: exception.message || 'Unexpected error occurred',
-    });
+      message:
+        exception instanceof BadRequestException && safeResponse.message
+          ? safeResponse.message
+          : safeResponse.message || 'Unexpected error occurred',
+    };
+
+    response.status(status).json(responseBody);
   }
 }
