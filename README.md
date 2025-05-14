@@ -21,6 +21,7 @@ You can run this project either locally using Node.js and npm, or using Docker.
     - npm (version compatible with NestJS 11, e.g., >= 8.x)
 2.  **Clone the repository (if applicable):**
     ```bash
+    git clone https://github.com/mabubakr1113/order-inventory
     cd order-inventory
     ```
 3.  **Install dependencies:**
